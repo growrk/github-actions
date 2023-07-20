@@ -1,5 +1,8 @@
 name: 'Set Environment'
 description: 'Create a .env with the Environment Variables'
+branding:
+  icon: 'save'
+  color: 'yellow'
 runs:
   using: 'node16'
   main: 'index.js'
