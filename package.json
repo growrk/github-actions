@@ -1,0 +1,23 @@
+{
+  "name": "@growrk/action-set-environment",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/growrk/action-set-environment.git"
+  },
+  "author": "Daniel Galindo <daniel@growrk.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/growrk/action-set-environment/issues"
+  },
+  "homepage": "https://github.com/growrk/action-set-environment#readme",
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "fs": "^0.0.1-security"
+  }
+}
