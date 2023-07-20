@@ -8,6 +8,7 @@ try {
   // Create the .env file
   let envContent = '';
   for (const secret in secrets) {
+    console.log(secret)
     if (secret.startsWith('SECRET_')) {
       envContent += `${secret}=${secrets[secret]}\n`;
     }
