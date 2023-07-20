@@ -1,5 +1,12 @@
 name: 'Set Environment'
-description: 'Create a .env with the Environment Variables'
+description: 'Merge globals and environment secrets in one .env file'
+inputs:
+  globals:
+    description: 'The globals secrets'
+    required: true
+  environment:
+    description: 'The environment secrets'
+    required: true
 branding:
   icon: 'save'
   color: 'yellow'

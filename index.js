@@ -2,17 +2,12 @@ const core = require('@actions/core');
 const fs = require('fs');
 
 try {
-  // Get all the secrets in the environment
-  const secrets = process.env;
+  // Get input parameters
+  const _globals = core.getInput('globals');
+  const environment = core.getInput('environment');
+  let envContent = `${_globals}
 
-  // Create the .env file
-  let envContent = '';
-  for (const secret in secrets) {
-    console.log(secret)
-    if (secret.startsWith('SECRET_')) {
-      envContent += `${secret}=${secrets[secret]}\n`;
-    }
-  }
+${environment}`;
 
   // Write the .env file
   fs.writeFileSync('.env', envContent);
