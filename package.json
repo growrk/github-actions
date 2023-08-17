@@ -1,6 +1,6 @@
 {
-  "name": "@growrk/action-set-environment",
-  "version": "1.0.5",
+  "name": "@growrk/action-grk-monorepo",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,16 +8,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/growrk/action-set-environment.git"
+    "url": "git+https://github.com/growrk/action-grk-monorepo.git"
   },
-  "author": "Daniel Galindo <daniel@growrk.com>",
+  "author": "daniel@growrk.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/growrk/action-set-environment/issues"
+    "url": "https://github.com/growrk/action-grk-monorepo/issues"
   },
-  "homepage": "https://github.com/growrk/action-set-environment#readme",
+  "homepage": "https://github.com/growrk/action-grk-monorepo#readme",
   "dependencies": {
     "@actions/core": "^1.10.0",
+    "@actions/exec": "^1.1.1",
     "fs": "^0.0.1-security"
   }
 }
