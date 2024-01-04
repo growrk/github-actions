@@ -95,8 +95,14 @@ runs:
         # Install Dependencies
         pnpm install --frozen-lockfile
         
-        ## Fix problem with the grk binary
-        pnpm i
+        ## Fix problem with the grk binary only in link repository
+        if [ "${{ github.repository }}" == "growrk/link" ]; then
+          echo "Fix problem with the grk binary only in link repository"
+          # grk build
+          pnpm -F @growrk/grk build
+          # grk install
+          pnpm i
+        fi
 
         # Copy the grk scripts to .growrk/scripts
         mkdir -p .growrk/scripts
