@@ -49,6 +49,14 @@ runs:
         key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-
+    - uses: actions/cache@v3 # 👈 Cache grk build only link
+      if: github.repository == 'growrk/link'
+      with:
+        path: |
+          packages/grk/dist
+        key: ${{ runner.os }}-grk-${{ hashFiles('packages/grk/**') }}
+        restore-keys: |
+          ${{ runner.os }}-grk-
     
     # get the current project to build and install dependencies
     - name: Get the current project
