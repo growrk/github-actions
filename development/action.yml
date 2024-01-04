@@ -43,12 +43,12 @@ runs:
     - uses: actions/cache@v3 # 👈 Cache dependencies
       with:
         path: |
-          .pnpm-store
+          ~/.pnpm-store
           node_modules
           packages/**/node_modules
-        key: pnpm-dependencies-${{ hashFiles('**/pnpm-lock.yaml') }}
+        key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
-          pnpm-dependencies-
+          ${{ runner.os }}-pnpm-
     
     # get the current project to build and install dependencies
     - name: Get the current project
