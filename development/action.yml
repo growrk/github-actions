@@ -90,6 +90,9 @@ runs:
         
         # Install Dependencies
         pnpm install --frozen-lockfile
+        
+        ## Fix problem with the grk binary
+        pnpm i
 
         # Copy the grk scripts to .growrk/scripts
         mkdir -p .growrk/scripts
