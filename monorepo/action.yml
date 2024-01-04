@@ -1,0 +1,78 @@
+name: monorepo
+
+inputs:
+  is-install:
+    description: 'If the action is install'
+    required: false
+  globals:
+    description: 'The globals secrets (install only)'
+    required: false
+  environment:
+    description: 'The environment secrets (install only)'
+    required: false
+  is-build:
+    description: 'If the action is build (name of the package)'
+    required: false
+  pack-requires:
+    description: 'The require package (name of the package)'
+    required: false
+
+runs:
+  using: 'composite' # 🧙‍♂️ the magic here
+  steps:
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 8
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+    - uses: actions/cache@v3 # 👈 Cache dependencies
+      with:
+        path: |
+          ~/.pnpm-store
+          node_modules
+          packages/**/node_modules
+        key: pnpm-dependencies-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          pnpm-dependencies-
+
+    - name: Workflow Artifacts
+      if: ${{ inputs.is-install != 1 }}
+      uses: actions/download-artifact@v3 # 👈 Download artifacts
+      with:
+        name: workflow-envs
+    
+    # get the current project to build (install only)
+    - name: Creating Workflow Artifacts
+      if: ${{ inputs.is-install == 1 }}
+      run: |
+        echo "${{ inputs.globals }}\\n${{ inputs.environment }}" > .env
+      shell: bash
+
+    - name: Build Requirements Download
+      if: ${{ inputs.pack-requires != 0 }}
+      uses: actions/download-artifact@v3 # 👈 Download artifacts
+      with:
+        name: build-${{ inputs.pack-requires }}
+    - name: Build Requirements Decompress
+      if: ${{ inputs.pack-requires != 0 }}
+      run: |
+        packName=${{ inputs.pack-requires }}
+        tar -xzvf ${packName}.tar.gz -C packages/${packName}/ --strip-components=2
+      shell: bash
+
+    - name: Build
+      if: ${{ inputs.is-build != 0 }}
+      run: |
+        buildName=${{ inputs.is-build }}
+        cp .env packages/${buildName}/.env
+        pnpm -F @growrk/${buildName} build
+        tar -czvf ${buildName}.tar.gz packages/${buildName}/.nuxt packages/${buildName}/.output
+      shell: bash
+    - name: Build Artifacts
+      if: ${{ inputs.is-build != 0 }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-${{ inputs.is-build }}
+        path: ${{ inputs.is-build }}.tar.gz

@@ -1,0 +1,136 @@
+name: development
+
+inputs:
+  is-install:
+    description: 'If the action is install'
+    required: false
+  globals:
+    description: 'The globals variables (install only)'
+    required: false
+  builder-credentials:
+    description: 'The credentials for the builder' # install only
+    required: false
+  builder-options:
+    description: 'The options for the builder' # install only
+    required: false
+  actor:
+    description: 'The actor' # install only
+    required: false
+  is-build:
+    description: 'If the action is build (name of the package)'
+    required: false
+  pack-requires:
+    description: 'The require package (name of the package)'
+    required: false
+  is-deploy:
+    description: 'If the action is deploy (name of the package)'
+    required: false
+
+runs:
+  using: 'composite' # 🧙‍♂️ the magic here
+  steps:
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 8
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+    - uses: actions/cache@v3 # 👈 Cache dependencies
+      with:
+        path: |
+          ~/.pnpm-store
+          node_modules
+          packages/**/node_modules
+        key: pnpm-dependencies-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          pnpm-dependencies-
+    
+    # get the current project to build
+    - name: Get the current project
+      if: ${{ inputs.is-install == 1 }}
+      run: |
+        GITHUB_ACTOR="${{ inputs.actor }}"
+        BUILDER_OPTIONS='${{ inputs.builder-options }}'
+        PROJECT_ID=$(echo "$BUILDER_OPTIONS" | jq -r ".${GITHUB_ACTOR}")
+        if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" == "null" ]; then
+          echo "Error: Project ID not found for actor ${GITHUB_ACTOR}"
+          exit 1
+        fi
+        echo "projectId=${PROJECT_ID}" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Workflow Artifacts
+      if: ${{ inputs.is-install != 1 }}
+      uses: actions/download-artifact@v3 # 👈 Download artifacts
+      with:
+        name: workflow-envs
+    
+    # Get the credentials from the google secret manager
+    - name: Prepare the environment
+      if: ${{ inputs.is-install == 1 }}
+      run: |
+        GROWRK_PROJECT_ID=growrk-${projectId}
+        echo "GROWRK_PROJECT_ID=${GROWRK_PROJECT_ID}" >> $GITHUB_ENV
+      shell: bash
+    - name: 'Set up Cloud SDK'
+      if: ${{ inputs.is-install == 1 }}
+      uses: 'google-github-actions/setup-gcloud@v1'
+      with:
+        project_id: ${{ env.GROWRK_PROJECT_ID }}
+    - name: Creating Workflow Artifacts
+      if: ${{ inputs.is-install == 1 }}
+      run: |
+        echo "Preparing the environment"
+        echo '${{ inputs.builder-credentials }}' | jq '.' > .key.builder.json
+        gcloud auth activate-service-account --key-file=.key.builder.json
+        gcloud config set project ${{ env.GROWRK_PROJECT_ID }}
+        echo "${{ inputs.globals }}\\n$(gcloud secrets versions access latest --secret='ENVIRONMENT' --project='${{ env.GROWRK_PROJECT_ID }}')" > .env
+        echo "$(gcloud secrets versions access latest --secret='SERVICE_ACCOUNT' --project='${{ env.GROWRK_PROJECT_ID }}')" > .key.json
+      shell: bash
+
+    # Build the package
+    - name: Build Requirements Download
+      if: ${{ inputs.pack-requires != 0 }}
+      uses: actions/download-artifact@v3 # 👈 Download artifacts
+      with:
+        name: build-${{ inputs.pack-requires }}
+    - name: Build Requirements Decompress
+      if: ${{ inputs.pack-requires != 0 }}
+      run: |
+        packName=${{ inputs.pack-requires }}
+        tar -xzvf ${packName}.tar.gz -C packages/${packName}/ --strip-components=2
+      shell: bash
+    - name: Build
+      if: ${{ inputs.is-build != 0 }}
+      run: |
+        buildName=${{ inputs.is-build }}
+        cp .env packages/${buildName}/.env
+        pnpm -F @growrk/${buildName} build
+        tar -czvf ${buildName}.tar.gz packages/${buildName}/.nuxt packages/${buildName}/.output
+      shell: bash
+    - name: Build Artifacts
+      if: ${{ inputs.is-build != 0 }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-${{ inputs.is-build }}
+        path: ${{ inputs.is-build }}.tar.gz
+
+    # Deploy the package
+    - name: Deploy Requirements
+      if: ${{ inputs.is-deploy == 1 }}
+      id: decode
+      run: |
+        echo "GROWRK_SA_KEY<<EOF" >> $GITHUB_ENV
+        echo "$(cat .key.json)" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+        echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/.key.json" >> $GITHUB_ENV
+      shell: bash
+    - name: Deploy
+      uses: 'google-github-actions/auth@v2'
+      if: ${{ inputs.is-deploy == 1 }}
+      with:
+        credentials_json: ${{ env.GROWRK_SA_KEY }}
+    - name: 'Set up Cloud SDK'
+      if: ${{ inputs.is-deploy == 1 }}
+      uses: 'google-github-actions/setup-gcloud@v1'
