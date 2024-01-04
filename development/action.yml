@@ -90,6 +90,13 @@ runs:
         
         # Install Dependencies
         pnpm install --frozen-lockfile
+
+        # Copy the grk scripts to .growrk/scripts
+        mkdir -p .growrk/scripts
+        cp -r node_modules/@growrk/scripts/* .growrk/scripts
+
+        # Run growbot install script
+        ./.growrk/scripts/growbotInstall.sh
       shell: bash
 
     # Build the package
