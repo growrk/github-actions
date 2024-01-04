@@ -22,6 +22,10 @@ inputs:
   pack-requires:
     description: 'The require package (name of the package)'
     required: false
+  build-directories:
+    description: 'Directories to compress' # build only
+    required: false
+    default: '.nuxt .output'
   is-deploy:
     description: 'If the action is deploy (name of the package)'
     required: false
@@ -120,7 +124,12 @@ runs:
         buildName=${{ inputs.is-build }}
         cp .env packages/${buildName}/.env
         pnpm -F @growrk/${buildName} build
-        tar -czvf ${buildName}.tar.gz packages/${buildName}/.nuxt packages/${buildName}/.output
+        IFS=' ' read -ra DIRS_TO_COMPRESS <<< "${{ inputs.build-directories }}"
+        DIRS_STR=""
+        for dir in "${DIRS_TO_COMPRESS[@]}"; do
+          DIRS_STR+="packages/${buildName}/$dir "
+        done
+        tar -czvf ${buildName}.tar.gz $DIRS_STR
       shell: bash
     - name: Build Artifacts
       if: ${{ inputs.is-build != 0 }}
