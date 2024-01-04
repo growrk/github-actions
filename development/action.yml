@@ -93,7 +93,7 @@ runs:
 
         # Copy the grk scripts to .growrk/scripts
         mkdir -p .growrk/scripts
-        cp -r node_modules/@growrk/scripts/* .growrk/scripts
+        cp -r node_modules/@growrk/grk/scripts/* .growrk/scripts
 
         # Run growbot install script
         ./.growrk/scripts/growbotInstall.sh
