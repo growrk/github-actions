@@ -164,6 +164,7 @@ runs:
       run: |
         source workflow.env
         echo "Bump version"
+        ls -la node_modules/@growrk/grk
         packName=${{ inputs.pack-requires }}
         pnpm grk ci:bump $WORKFLOW_VERSION $packName
 
