@@ -91,10 +91,6 @@ runs:
         gcloud config set project ${{ env.GROWRK_PROJECT_ID }}
         echo "${{ inputs.globals }}\\n$(gcloud secrets versions access latest --secret='ENVIRONMENT' --project='${{ env.GROWRK_PROJECT_ID }}')" > .env
         echo "$(gcloud secrets versions access latest --secret='SERVICE_ACCOUNT' --project='${{ env.GROWRK_PROJECT_ID }}')" > .key.json
-
-        # Check cache dirs
-        ls -la
-        ls -la packages/io
         
         # Install Dependencies
         pnpm install --frozen-lockfile
@@ -163,3 +159,17 @@ runs:
     - name: 'Set up Cloud SDK'
       if: ${{ inputs.is-deploy == 1 }}
       uses: 'google-github-actions/setup-gcloud@v1'
+    - name: Preparing the environment
+      if: ${{ inputs.is-deploy == 1 }}
+      run: |
+        source workflow.env
+        echo "Bump version"
+        packName=${{ inputs.pack-requires }}
+        pnpm grk ci:bump $WORKFLOW_VERSION $packName
+
+        cp README.md packages/$packName/
+        cp .npmrc packages/$packName/
+
+        pnpm grk fixes
+        pnpm firebase use $WORKFLOW_ENVIRONMENT
+      shell: bash
