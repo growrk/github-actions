@@ -44,10 +44,13 @@ runs:
         name: workflow-envs
     
     # get the current project to build (install only)
-    - name: Creating Workflow Artifacts
+    - name: Creating Workflow Artifacts and Install Dependencies
       if: ${{ inputs.is-install == 1 }}
       run: |
         echo "${{ inputs.globals }}\\n${{ inputs.environment }}" > .env
+        
+        # Install Dependencies
+        pnpm install --frozen-lockfile
       shell: bash
 
     - name: Build Requirements Download

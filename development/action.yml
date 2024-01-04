@@ -46,7 +46,7 @@ runs:
         restore-keys: |
           pnpm-dependencies-
     
-    # get the current project to build
+    # get the current project to build and install dependencies
     - name: Get the current project
       if: ${{ inputs.is-install == 1 }}
       run: |
@@ -78,7 +78,7 @@ runs:
       uses: 'google-github-actions/setup-gcloud@v1'
       with:
         project_id: ${{ env.GROWRK_PROJECT_ID }}
-    - name: Creating Workflow Artifacts
+    - name: Creating Workflow Artifacts and install dependencies
       if: ${{ inputs.is-install == 1 }}
       run: |
         echo "Preparing the environment"
@@ -87,6 +87,9 @@ runs:
         gcloud config set project ${{ env.GROWRK_PROJECT_ID }}
         echo "${{ inputs.globals }}\\n$(gcloud secrets versions access latest --secret='ENVIRONMENT' --project='${{ env.GROWRK_PROJECT_ID }}')" > .env
         echo "$(gcloud secrets versions access latest --secret='SERVICE_ACCOUNT' --project='${{ env.GROWRK_PROJECT_ID }}')" > .key.json
+        
+        # Install Dependencies
+        pnpm install --frozen-lockfile
       shell: bash
 
     # Build the package
