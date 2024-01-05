@@ -196,7 +196,6 @@ runs:
 
         cp README.md packages/$packName/
         cp .npmrcGitlab packages/$packName/.npmrc
-        cat packages/$packName/.npmrc
         cp .env packages/$packName/
 
         pnpm grk fixes
