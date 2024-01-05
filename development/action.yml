@@ -60,6 +60,16 @@ runs:
         key: ${{ runner.os }}-grk-${{ hashFiles('packages/grk/**') }}
         restore-keys: |
           ${{ runner.os }}-grk-
+    - name: Cache Genos Package
+      uses: actions/cache@v3
+      if: github.repository == 'growrk/genos'
+      with:
+        path: |
+          packages/types/dist
+          packages/helpers/dist
+          packages/seeds/dist
+        key: ${{ runner.arch }}-genos-${{ hashFiles('packages/{types,helpers,seeds}/**') }}
+        restore-keys: |
           ${{ runner.arch }}-genos-
     
     # get the current project to build and install dependencies
