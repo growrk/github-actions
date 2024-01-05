@@ -1,4 +1,4 @@
-name: development
+name: Development Workflow
 
 inputs:
   is-install:
@@ -31,16 +31,18 @@ inputs:
     required: false
 
 runs:
-  using: 'composite' # 🧙‍♂️ the magic here
+  using: 'composite' # 🧙‍♂️ the magic
   steps:
-    - uses: pnpm/action-setup@v2
+    - name: Setup PNPM
+      uses: pnpm/action-setup@v2
       with:
         version: 8
-    - name: Use Node.js
+    - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '20.x'
-    - uses: actions/cache@v3 # 👈 Cache dependencies
+    - name: Cache Dependencies
+      uses: actions/cache@v3
       with:
         path: |
           .pnpm-store
@@ -49,7 +51,8 @@ runs:
         key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-
-    - uses: actions/cache@v3 # 👈 Cache grk build only link
+    - name: Cache GRK Package
+      uses: actions/cache@v3
       if: github.repository == 'growrk/link'
       with:
         path: |
@@ -59,7 +62,7 @@ runs:
           ${{ runner.os }}-grk-
     
     # get the current project to build and install dependencies
-    - name: Get the current project
+    - name: Retrieve Project ID
       if: ${{ inputs.is-install == 1 }}
       run: |
         GITHUB_ACTOR="${{ inputs.actor }}"
@@ -72,7 +75,7 @@ runs:
         echo "projectId=${PROJECT_ID}" >> $GITHUB_ENV
       shell: bash
 
-    - name: Workflow Artifacts
+    - name: Download Workflow Artifacts
       if: ${{ inputs.is-install != 1 }}
       uses: actions/download-artifact@v3 # 👈 Download artifacts
       with:
@@ -85,12 +88,12 @@ runs:
         GROWRK_PROJECT_ID=growrk-${projectId}
         echo "GROWRK_PROJECT_ID=${GROWRK_PROJECT_ID}" >> $GITHUB_ENV
       shell: bash
-    - name: 'Set up Cloud SDK'
+    - name: Setup Google Cloud SDK
       if: ${{ inputs.is-install == 1 }}
       uses: 'google-github-actions/setup-gcloud@v1'
       with:
         project_id: ${{ env.GROWRK_PROJECT_ID }}
-    - name: Creating Workflow Artifacts and install dependencies
+    - name: Install Dependencies and Prepare Environment
       if: ${{ inputs.is-install == 1 }}
       run: |
         echo "Preparing the environment"
@@ -119,7 +122,7 @@ runs:
         # Run growbot install script
         ./.growrk/scripts/growbotInstall.sh
       shell: bash
-    - name: Upload Install Artifacts
+    - name: Upload Installation Artifacts
       if: ${{ inputs.is-install == 1 }}
       uses: actions/upload-artifact@v3
       with:
@@ -133,18 +136,18 @@ runs:
           workflow.env
 
     # Build the package
-    - name: Build Requirements Download
+    - name: Download Build Requirements
       if: ${{ inputs.pack-requires != 0 }}
-      uses: actions/download-artifact@v3 # 👈 Download artifacts
+      uses: actions/download-artifact@v3
       with:
         name: build-${{ inputs.pack-requires }}
-    - name: Build Requirements Decompress
+    - name: Decompress Build Requirements
       if: ${{ inputs.pack-requires != 0 }}
       run: |
         packName=${{ inputs.pack-requires }}
         tar -xzvf ${packName}.tar.gz -C packages/${packName}/ --strip-components=2
       shell: bash
-    - name: Build
+    - name: Build Package
       if: ${{ inputs.is-build != 0 }}
       run: |
         buildName=${{ inputs.is-build }}
@@ -160,7 +163,7 @@ runs:
         done
         tar -czvf ${buildName}.tar.gz $DIRS_STR
       shell: bash
-    - name: Build Artifacts
+    - name: Upload Build Artifacts
       if: ${{ inputs.is-build != 0 }}
       uses: actions/upload-artifact@v3
       with:
@@ -168,7 +171,7 @@ runs:
         path: ${{ inputs.is-build }}.tar.gz
 
     # Deploy the package
-    - name: Deploy Requirements
+    - name: Prepare for Deployment
       if: ${{ inputs.is-deploy == 1 }}
       id: decode
       run: |
@@ -177,15 +180,15 @@ runs:
         echo "EOF" >> $GITHUB_ENV
         echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/.key.json" >> $GITHUB_ENV
       shell: bash
-    - name: Deploy
+    - name: Authenticate for Deployment
       uses: 'google-github-actions/auth@v2'
       if: ${{ inputs.is-deploy == 1 }}
       with:
         credentials_json: ${{ env.GROWRK_SA_KEY }}
-    - name: 'Set up Cloud SDK'
+    - name: Setup Google Cloud SDK for Deployment
       if: ${{ inputs.is-deploy == 1 }}
       uses: 'google-github-actions/setup-gcloud@v1'
-    - name: Preparing the environment
+    - name: Deploy Package
       if: ${{ inputs.is-deploy == 1 }}
       run: |
         source workflow.env
