@@ -180,10 +180,11 @@ runs:
         echo "Bump version"
         ls -la node_modules/@growrk/grk
         packName=${{ inputs.pack-requires }}
-        pnpm grk ci:bump $WORKFLOW_VERSION $packName
+        pnpm grk ci:bump $WORKFLOW_VERSION
 
         cp README.md packages/$packName/
         cp .npmrc packages/$packName/
+        cp .env packages/$packName/
 
         pnpm grk fixes
         pnpm firebase use $WORKFLOW_ENVIRONMENT
