@@ -119,6 +119,9 @@ runs:
         mkdir -p .growrk/scripts
         cp -r node_modules/@growrk/grk/scripts/* .growrk/scripts
 
+        # Change permissions of the script to make it executable
+        chmod +x .growrk/scripts/*
+
         # Run growbot install script
         ./.growrk/scripts/growbotInstall.sh
       shell: bash
