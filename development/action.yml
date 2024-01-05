@@ -60,12 +60,11 @@ runs:
         key: ${{ runner.os }}-grk-${{ hashFiles('packages/grk/**') }}
         restore-keys: |
           ${{ runner.os }}-grk-
-    - name: Debug Glob Pattern
+    - name: Generate Genos Hash
       if: github.repository == 'growrk/genos'
       run: |
-        ls -la packages
-        ls -la packages/types
-        ls -la packages/helpers
+        GENOS_HASH=$(find packages/{types,helpers,seeds} -not -path '*/node_modules/*' -type f | sort | xargs sha256sum | sha256sum)
+        echo "GENOS_HASH=${GENOS_HASH}" >> $GITHUB_ENV
       shell: bash
     - name: Cache Genos Package
       uses: actions/cache@v3
@@ -75,7 +74,7 @@ runs:
           packages/types/dist
           packages/helpers/dist
           packages/seeds/dist
-        key: ${{ runner.arch }}-genos-${{ hashFiles('packages/{types,helpers,seeds}/**') }}
+        key: ${{ runner.arch }}-genos-${{ env.GENOS_HASH }}
         restore-keys: |
           ${{ runner.arch }}-genos-
     
