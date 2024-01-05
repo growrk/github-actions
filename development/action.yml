@@ -60,6 +60,7 @@ runs:
         key: ${{ runner.os }}-grk-${{ hashFiles('packages/grk/**') }}
         restore-keys: |
           ${{ runner.os }}-grk-
+          ${{ runner.arch }}-genos-
     
     # get the current project to build and install dependencies
     - name: Retrieve Project ID
