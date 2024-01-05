@@ -127,6 +127,7 @@ runs:
         path: |
           .env
           .npmrcGitlab
+          .npmrcGithub
           .key.json
           .firebaserc
           workflow.env
