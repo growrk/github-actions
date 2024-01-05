@@ -60,6 +60,12 @@ runs:
         key: ${{ runner.os }}-grk-${{ hashFiles('packages/grk/**') }}
         restore-keys: |
           ${{ runner.os }}-grk-
+    - name: Debug Glob Pattern
+      if: github.repository == 'growrk/genos'
+      run: |
+        ls -la packages
+        ls -la packages/types
+        ls -la packages/helpers
     - name: Cache Genos Package
       uses: actions/cache@v3
       if: github.repository == 'growrk/genos'
