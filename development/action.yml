@@ -66,6 +66,7 @@ runs:
         ls -la packages
         ls -la packages/types
         ls -la packages/helpers
+      shell: bash
     - name: Cache Genos Package
       uses: actions/cache@v3
       if: github.repository == 'growrk/genos'
