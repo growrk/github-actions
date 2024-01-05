@@ -119,6 +119,17 @@ runs:
         # Run growbot install script
         ./.growrk/scripts/growbotInstall.sh
       shell: bash
+    - name: Upload Install Artifacts
+      if: ${{ inputs.is-install == 1 }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: workflow-envs
+        path: |
+          .env
+          .npmrcGitlab
+          .key.json
+          .firebaserc
+          workflow.env
 
     # Build the package
     - name: Build Requirements Download
@@ -183,7 +194,8 @@ runs:
         pnpm grk ci:bump $WORKFLOW_VERSION
 
         cp README.md packages/$packName/
-        cp .npmrc packages/$packName/
+        cp .npmrcGitlab packages/$packName/.npmrc
+        cat packages/$packName/.npmrc
         cp .env packages/$packName/
 
         pnpm grk fixes
