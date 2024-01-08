@@ -165,22 +165,47 @@ runs:
       if: ${{ inputs.pack-requires != 0 }}
       run: |
         packName=${{ inputs.pack-requires }}
-        tar -xzvf ${packName}.tar.gz -C packages/${packName}/ --strip-components=2
+        initialDir=packages
+        uncompressedDir=$initialDir/${packName}/
+        
+        ## Fix problem with the website repository, it's a regular repository instead of a monorepo
+        if [ "${{ github.repository }}" == "growrk/website" ]; then
+          initialDir=.
+          uncompressedDir=$initialDir/
+        fi
+
+        tar -xzvf ${packName}.tar.gz -C $uncompressedDir --strip-components=2
       shell: bash
     - name: Build Package
       if: ${{ inputs.is-build != 0 }}
       run: |
         buildName=${{ inputs.is-build }}
-        cp .env packages/${buildName}/.env
-        pnpm -F @growrk/${buildName} build
+        initialDir=packages
+        buildDir=$initialDir/${buildName}
+        buildCommand="pnpm -F @growrk/${buildName} build"
+
+        ## Fix problem with the website repository, it's a regular repository instead of a monorepo
+        if [ "${{ github.repository }}" == "growrk/website" ]; then
+          initialDir=.
+          buildDir=$initialDir
+          buildCommand="pnpm build && pnpm generate"
+        fi
+
+        cp .env ${buildDir}/.env
+        $buildCommand
         IFS=' ' read -ra DIRS_TO_COMPRESS <<< "${{ inputs.build-directories }}"
         DIRS_STR=""
         for dir in "${DIRS_TO_COMPRESS[@]}"; do
-          DIRS_STR+="packages/${buildName}/$dir "
+          DIRS_STR+="${buildDir}/$dir "
           if [ "$dir" == ".output" ]; then
-            cp .key.json packages/${buildName}/$dir/server/keys.json
+            cp .key.json ${buildDir}/$dir/server/keys.json
           fi
         done
+
+        if [ "${{ github.repository }}" == "growrk/website" ]; then
+          cp dist/robots.txt dist/sitemap.xml .nuxt/dist
+        fi
+
         tar -czvf ${buildName}.tar.gz $DIRS_STR
       shell: bash
     - name: Upload Build Artifacts
