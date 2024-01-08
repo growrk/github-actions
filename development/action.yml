@@ -84,7 +84,7 @@ runs:
       run: |
         GITHUB_ACTOR="${{ inputs.actor }}"
         BUILDER_OPTIONS='${{ inputs.builder-options }}'
-        PROJECT_ID=$(echo "$BUILDER_OPTIONS" | jq -r ".${GITHUB_ACTOR}")
+        PROJECT_ID=$(echo "$BUILDER_OPTIONS" | jq -r ".\"${GITHUB_ACTOR}\"")
         if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" == "null" ]; then
           echo "Error: Project ID not found for actor ${GITHUB_ACTOR}"
           exit 1
