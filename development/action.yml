@@ -182,18 +182,17 @@ runs:
         buildName=${{ inputs.is-build }}
         initialDir=packages
         buildDir=$initialDir/${buildName}
-        buildCommand="pnpm -F @growrk/${buildName} build"
-
+        
         ## Fix problem with the website repository, it's a regular repository instead of a monorepo
         if [ "${{ github.repository }}" == "growrk/website" ]; then
           initialDir=.
           buildDir=$initialDir
-          buildCommand="pnpm build && pnpm generate"
+          pnpm build && pnpm generate
         else
+          pnpm -F @growrk/${buildName} build
           cp .env ${buildDir}/.env
         fi
 
-        $buildCommand
         IFS=' ' read -ra DIRS_TO_COMPRESS <<< "${{ inputs.build-directories }}"
         DIRS_STR=""
         for dir in "${DIRS_TO_COMPRESS[@]}"; do
