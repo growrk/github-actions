@@ -189,9 +189,10 @@ runs:
           initialDir=.
           buildDir=$initialDir
           buildCommand="pnpm build && pnpm generate"
+        else
+          cp .env ${buildDir}/.env
         fi
 
-        cp .env ${buildDir}/.env
         $buildCommand
         IFS=' ' read -ra DIRS_TO_COMPRESS <<< "${{ inputs.build-directories }}"
         DIRS_STR=""
