@@ -251,5 +251,6 @@ runs:
           pnpm grk fixes
         fi
 
+        cat .firebaserc
         pnpm firebase use $WORKFLOW_ENVIRONMENT
       shell: bash
