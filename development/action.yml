@@ -239,6 +239,7 @@ runs:
       run: |
         packName=${{ inputs.pack-requires }}
         source workflow.env
+        echo "WORKFLOW_VERSION=${WORKFLOW_VERSION}" >> $GITHUB_ENV
 
         ## Fix problem with the website repository, it's a regular repository instead of a monorepo
         if [ "${{ github.repository }}" == "growrk/website" ]; then
