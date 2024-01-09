@@ -190,6 +190,7 @@ runs:
           pnpm build && pnpm generate
         else
           cp .env ${buildDir}/.env
+          cat ${buildDir}/.env
           pnpm -F @growrk/${buildName} build
         fi
 
