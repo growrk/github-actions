@@ -250,5 +250,7 @@ runs:
           pnpm grk fixes
         fi
 
-        pnpm firebase use $WORKFLOW_ENVIRONMENT
+        # In this point we have the google cloud variables due to the previous step "Setup Google Cloud SDK for Deployment"
+        # So, we can use the $GCLOUD_PROJECT variable
+        pnpm firebase use $GCLOUD_PROJECT
       shell: bash
