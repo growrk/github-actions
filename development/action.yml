@@ -239,18 +239,18 @@ runs:
       run: |
         packName=${{ inputs.pack-requires }}
         source workflow.env
-        echo "Bump version"
 
         ## Fix problem with the website repository, it's a regular repository instead of a monorepo
-        if [ "${{ github.repository }}" != "growrk/website" ]; then
-          pnpm grk ci:bump $WORKFLOW_VERSION
-          cp README.md packages/$packName/
-          cp .npmrcGitlab packages/$packName/.npmrc
-          cp .env packages/$packName/
-
-          pnpm grk fixes
+        if [ "${{ github.repository }}" == "growrk/website" ]; then
+          exit 0
         fi
+        
+        echo "Bump version"
+        pnpm grk ci:bump $WORKFLOW_VERSION
+        cp README.md packages/$packName/
+        cp .npmrcGitlab packages/$packName/.npmrc
+        cp .env packages/$packName/
 
-        cat .firebaserc
+        pnpm grk fixes
         pnpm firebase use $WORKFLOW_ENVIRONMENT
       shell: bash
