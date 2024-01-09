@@ -182,7 +182,7 @@ runs:
         buildName=${{ inputs.is-build }}
         initialDir=packages
         buildDir=$initialDir/${buildName}
-        
+
         ## Fix problem with the website repository, it's a regular repository instead of a monorepo
         if [ "${{ github.repository }}" == "growrk/website" ]; then
           initialDir=.
@@ -236,16 +236,19 @@ runs:
     - name: Deploy Package
       if: ${{ inputs.is-deploy == 1 }}
       run: |
+        packName=${{ inputs.pack-requires }}
         source workflow.env
         echo "Bump version"
-        ls -la node_modules/@growrk/grk
-        packName=${{ inputs.pack-requires }}
-        pnpm grk ci:bump $WORKFLOW_VERSION
 
-        cp README.md packages/$packName/
-        cp .npmrcGitlab packages/$packName/.npmrc
-        cp .env packages/$packName/
+        ## Fix problem with the website repository, it's a regular repository instead of a monorepo
+        if [ "${{ github.repository }}" != "growrk/website" ]; then
+          pnpm grk ci:bump $WORKFLOW_VERSION
+          cp README.md packages/$packName/
+          cp .npmrcGitlab packages/$packName/.npmrc
+          cp .env packages/$packName/
 
-        pnpm grk fixes
+          pnpm grk fixes
+        fi
+
         pnpm firebase use $WORKFLOW_ENVIRONMENT
       shell: bash
