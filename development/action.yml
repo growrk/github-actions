@@ -187,7 +187,7 @@ runs:
         if [ "${{ github.repository }}" == "growrk/website" ]; then
           initialDir=.
           buildDir=$initialDir
-          pnpm build && pnpm generate
+          pnpm build
         else
           cp .env ${buildDir}/.env
           cat ${buildDir}/.env
