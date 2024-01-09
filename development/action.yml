@@ -84,12 +84,12 @@ runs:
       run: |
         GITHUB_ACTOR="${{ inputs.actor }}"
         BUILDER_OPTIONS='${{ inputs.builder-options }}'
-        PROJECT_ID=$(echo "$BUILDER_OPTIONS" | jq -r ".\"${GITHUB_ACTOR}\"")
-        if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" == "null" ]; then
+        ENVIRONMENT_ID=$(echo "$BUILDER_OPTIONS" | jq -r ".\"${GITHUB_ACTOR}\"")
+        if [ -z "$ENVIRONMENT_ID" ] || [ "$ENVIRONMENT_ID" == "null" ]; then
           echo "Error: Project ID not found for actor ${GITHUB_ACTOR}"
           exit 1
         fi
-        echo "projectId=${PROJECT_ID}" >> $GITHUB_ENV
+        echo "ENVIRONMENT_ID=${ENVIRONMENT_ID}" >> $GITHUB_ENV
       shell: bash
 
     - name: Download Workflow Artifacts
@@ -102,7 +102,7 @@ runs:
     - name: Prepare the environment
       if: ${{ inputs.is-install == 1 }}
       run: |
-        GROWRK_PROJECT_ID=growrk-${projectId}
+        GROWRK_PROJECT_ID=growrk-${ENVIRONMENT_ID}
         echo "GROWRK_PROJECT_ID=${GROWRK_PROJECT_ID}" >> $GITHUB_ENV
       shell: bash
     - name: Setup Google Cloud SDK
@@ -197,7 +197,7 @@ runs:
         DIRS_STR=""
         for dir in "${DIRS_TO_COMPRESS[@]}"; do
           DIRS_STR+="${buildDir}/$dir "
-          if [ "$dir" == ".output" ]; then
+          if [ "$dir" == ".output" ] && [ "${{ github.repository }}" == "growrk/link" ]; then
             cp .key.json ${buildDir}/$dir/server/keys.json
           fi
         done
@@ -250,7 +250,5 @@ runs:
           pnpm grk fixes
         fi
 
-        # In this point we have the google cloud variables due to the previous step "Setup Google Cloud SDK for Deployment"
-        # So, we can use the $GCLOUD_PROJECT variable
-        pnpm firebase use $GCLOUD_PROJECT
+        pnpm firebase use $WORKFLOW_ENVIRONMENT
       shell: bash
