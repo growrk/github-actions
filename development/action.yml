@@ -189,8 +189,8 @@ runs:
           buildDir=$initialDir
           pnpm build && pnpm generate
         else
-          pnpm -F @growrk/${buildName} build
           cp .env ${buildDir}/.env
+          pnpm -F @growrk/${buildName} build
         fi
 
         IFS=' ' read -ra DIRS_TO_COMPRESS <<< "${{ inputs.build-directories }}"
