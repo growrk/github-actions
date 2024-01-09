@@ -117,7 +117,7 @@ runs:
         echo '${{ inputs.builder-credentials }}' | jq '.' > .key.builder.json
         gcloud auth activate-service-account --key-file=.key.builder.json
         gcloud config set project ${{ env.GROWRK_PROJECT_ID }}
-        echo "${{ inputs.globals }}\n\n$(gcloud secrets versions access latest --secret='ENVIRONMENT' --project='${{ env.GROWRK_PROJECT_ID }}')" > .env
+        echo -e "$(gcloud secrets versions access latest --secret='ENVIRONMENT' --project='${{ env.GROWRK_PROJECT_ID }}')\n\n${{ inputs.globals }}" > .env
         echo "$(gcloud secrets versions access latest --secret='SERVICE_ACCOUNT' --project='${{ env.GROWRK_PROJECT_ID }}')" > .key.json
         
         # Install Dependencies
