@@ -171,7 +171,7 @@ runs:
         ## Fix problem with the website repository, it's a regular repository instead of a monorepo
         if [ "${{ github.repository }}" == "growrk/website" ]; then
           initialDir=.
-          uncompressedDir=$initialDir/
+          uncompressedDir=$initialDir/.nuxt/
         fi
 
         tar -xzvf ${packName}.tar.gz -C $uncompressedDir --strip-components=2
