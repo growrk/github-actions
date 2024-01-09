@@ -252,5 +252,6 @@ runs:
         cp .env packages/$packName/
 
         pnpm grk fixes
+        cat .firebaserc
         pnpm firebase use $WORKFLOW_ENVIRONMENT
       shell: bash
