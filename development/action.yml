@@ -172,6 +172,7 @@ runs:
         if [ "${{ github.repository }}" == "growrk/website" ]; then
           initialDir=.
           uncompressedDir=$initialDir/.nuxt/
+          mkdir -p $uncompressedDir
         fi
 
         tar -xzvf ${packName}.tar.gz -C $uncompressedDir --strip-components=2
